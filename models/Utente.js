@@ -3,17 +3,15 @@ module.exports = (sequelize, Sequelize) => {
         id: {
             type: Sequelize.UUID,
             allowNull: false,
-            unique: true,
+            primaryKey: true,
         },
         cf: {
             type: Sequelize.STRING(20),
             allowNull: false,
-            primaryKey: true
         },
         tipo: {
             type: Sequelize.ENUM('amministratore', 'impParcheggio', 'cliente', 'autista'),
             allowNull: false,
-            primaryKey: true
         },
         email: {
             type: Sequelize.STRING,
@@ -56,6 +54,12 @@ module.exports = (sequelize, Sequelize) => {
             allowNull: false,
         }
     }, {
-        freezeTableName: 'utenti',
+        indexes: [
+            {
+                unique: true,
+                fields: ['cf', 'tipo']
+            }
+        ],
+        freezeTableName: 'utente',
     }
 )}
