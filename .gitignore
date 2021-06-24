@@ -10,6 +10,7 @@ npm-debug.*
 web-build/
 vs.code-workspace
 package-lock.json
+*.old
 
 # macOS
 .DS_Store
