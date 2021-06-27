@@ -1,12 +1,12 @@
 var express = require('express');
 var router = express.Router();
 const { Utente } = require('../../db/middleware');
+const sha256 = require('crypto-js/sha256');
 
 router.use(express.urlencoded({extended: true}));
-router.use(express.json())
+router.use(express.json());
 
 router.get('/get', async (req, res) => {
-
     try {
         const users = await Utente.findAll();
         res.json( {users} );
@@ -112,6 +112,62 @@ router.post('/login', async (req, res) => {
         res.json( { status: 'error' } )
         console.log(error);
     }  
+})
+
+router.post('/recuperaPassword', async (req, res) => {
+    try 
+    {
+        const username = req.body.nomeutente;
+
+        const user = await Utente.findOne({
+            attributes: ['id', 'email'],
+            where: {
+                nomeutente: username,
+            }
+        });
+        if(user)
+        {
+            let randomPassword = Math.random().toString(36).slice(-8);
+            console.log(randomPassword + ' generata ed inviata a: ' + user.email);
+            user.update({
+                password: sha256(randomPassword).toString(),
+            })
+            res.json( { status: 'ok' } );
+        }
+        else
+            res.json( { status: 'ko' } );
+    }
+    catch(error)
+    {
+        res.json( { status: 'error' } );
+        console.log(error);
+    }
+})
+
+router.post('/recuperaNomeUtente', async (req, res) => {
+    try 
+    {
+        const email = req.body.email;
+
+        const user = await Utente.findOne({
+            attributes: ['id', 'email', 'nomeutente'],
+            where: {
+                email: email,
+            }
+        });
+        if(user)
+        {
+            console.log(user.nomeutente + ' trovato ed inviato a: ' + user.email);
+            res.json( { status: 'ok' } );
+        }
+        else
+            res.json( { status: 'ko' } );
+    }
+    catch(error)
+    {
+        res.json( { status: 'error' } );
+        console.log(error);
+    }
 })
 
 module.exports = router;
