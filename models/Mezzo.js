@@ -9,9 +9,13 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.STRING,
             allowNull: true
         },
+        tipo: {
+            type: Sequelize.ENUM('Auto','Bicicletta','Moto','Monopattino'),
+            allowNull: false,
+        },
         targa: {
             type: Sequelize.STRING(7),
-            allowNull: false,
+            allowNull: true,
         },
         batteria: {
             type: Sequelize.DECIMAL(3,2),
