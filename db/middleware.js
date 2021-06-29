@@ -6,7 +6,8 @@ const PrenotazioneModel = require('../models/Prenotazione');
 
 // db, username, password, { options }
 const sequelize = new Sequelize('eurekapi', 'eurekapi', 'eurekapi', {
-    dialect: 'mariadb'
+    dialect: 'mariadb',
+    logging: false
 });
 
 const Utente = UtenteModel(sequelize, Sequelize);
