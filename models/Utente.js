@@ -16,7 +16,8 @@ module.exports = (sequelize, Sequelize) => {
         },
         email: {
             type: Sequelize.STRING,
-            allowNull: false, // sure?
+            allowNull: false,
+            unique: true,
         },
         carta: {
             type: Sequelize.STRING(16),
@@ -45,6 +46,7 @@ module.exports = (sequelize, Sequelize) => {
         nomeutente: {
             type: Sequelize.STRING,
             allowNull: false,
+            unique: true
         },
         nome: {
             type: Sequelize.STRING,
