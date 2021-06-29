@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 const { Utente } = require('../../db/middleware');
 const sha256 = require('crypto-js/sha256');
+const { Op } = require('sequelize');
 
 router.use(express.urlencoded({extended: true}));
 router.use(express.json());
@@ -40,10 +41,14 @@ router.post('/post', async (req, res) => {
     try {
         req.body['tipo'] = 'cliente';
         Utente.create(req.body)
-            .then(utente => res.json({status: 'ok', id: utente.id}));
+            .then(utente => res.json({status: 'ok', id: utente.id}))
+            .catch(error => {
+                console.log(error);
+                res.json({status: 'ko'});
+            });
     } catch(error) {
         console.log(error);
-        res.json( { status: 'ko', id: null } );
+        res.json( { status: 'ko' } );
     }
 })
 
@@ -96,6 +101,8 @@ router.post('/login', async (req, res) => {
         const username = req.body.nomeutente;
         const passwordsha256 = req.body.password;
 
+        console.log(`${username} sta provando ad effettuare il login...`);
+
         const user = await Utente.findOne({
             attributes: ['id', 'tipo', 'email','datanascita', 'nome', 'cognome'],
             where: {
@@ -103,9 +110,11 @@ router.post('/login', async (req, res) => {
                 password: passwordsha256,
             }
         });
-        // console.log( { user } );
         if(user) // utente trovato
+        {
+            console.log(`${username} ha effettuato il login.`);
             res.json( { status: 'ok', user: user } )
+        }
         else
             res.json( { status: 'ko', user: null } )
     } catch(error) {
@@ -169,5 +178,37 @@ router.post('/recuperaNomeUtente', async (req, res) => {
         console.log(error);
     }
 })
+
+router.post('/ricerca', async (req, res) => {
+    const nomeUtente = req.body.nomeutente;
+    const tipo = req.body.tipo;
+
+    try
+    {
+        await Utente.findAll({
+            // TODO: rimuovere password dagli attributi
+            where: {
+                nomeutente:
+                {
+                    [Op.like]: `%${nomeUtente}%`
+                },
+                tipo: tipo
+            }
+        }).then(
+            utenti => {
+                if(utenti.length > 0)
+                    res.json({status: 'ok', utenti: utenti})
+                else
+                    res.json({status: 'ko'})
+            }
+        ).catch( 
+            error => res.json({status: 'error'})
+        )
+    }
+    catch(error)
+    {
+        console.log(error);
+    }
+});
 
 module.exports = router;
