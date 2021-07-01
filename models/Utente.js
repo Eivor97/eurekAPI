@@ -23,6 +23,7 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.STRING(16),
             allowNull: true,
         },
+        
         cartaCVV: {
             type: Sequelize.STRING(3),
             allowNull: true,
