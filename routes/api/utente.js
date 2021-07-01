@@ -3,6 +3,8 @@ var router = express.Router();
 const { Utente } = require('../../db/middleware');
 const sha256 = require('crypto-js/sha256');
 const { Op } = require('sequelize');
+const { generaToken, verificaToken } = require('../../middleware/auth.js')
+
 
 router.use(express.urlencoded({extended: true}));
 router.use(express.json());
@@ -17,19 +19,25 @@ router.get('/get', async (req, res) => {
 })
 
 router.get('/get/:userId', async (req, res) => {
-
     const userId = req.params.userId;
 
-    try {
+    try
+    {
         const user = await Utente.findOne({
             where: {    
                 id: userId
             }
-        });
-        res.json( { user } );
-    } catch(error) {
-        console.error(error);
-    }   
+        })
+        if(user)
+            res.json({status: 'ok', user: user})
+        else
+            res.json({status: 'ko'})
+    }
+    catch(error)
+    {
+        console.log(error);
+        res.json({status: 'error'});
+    }
 })
 
 router.get('/post', async (req, res) => {
@@ -39,9 +47,12 @@ router.get('/post', async (req, res) => {
 
 router.post('/post', async (req, res) => {
     try {
-        req.body['tipo'] = 'cliente';
+        console.log(`${req.body.nomeutente} sta provando ad effettuare la registrazione`);
         Utente.create(req.body)
-            .then(utente => res.json({status: 'ok', id: utente.id}))
+            .then(utente => {
+                console.log(`registrazione effettuata, id: ${utente.id}`);
+                res.json({status: 'ok', id: utente.id})
+            })
             .catch(error => {
                 console.log(error);
                 res.json({status: 'ko'});
@@ -112,8 +123,9 @@ router.post('/login', async (req, res) => {
         });
         if(user) // utente trovato
         {
+            const token = generaToken({id: user.id, tipo: user.tipo, email: user.email});
             console.log(`${username} ha effettuato il login.`);
-            res.json( { status: 'ok', user: user } )
+            res.json( { status: 'ok', user: user, token: token} );
         }
         else
             res.json( { status: 'ko', user: null } )
@@ -179,10 +191,10 @@ router.post('/recuperaNomeUtente', async (req, res) => {
     }
 })
 
-router.post('/ricerca', async (req, res) => {
+router.post('/ricerca', verificaToken, async (req, res) => {
     const nomeUtente = req.body.nomeutente;
     const tipo = req.body.tipo;
-
+    console.log(`Cercato ${tipo} ${nomeUtente}`);
     try
     {
         await Utente.findAll({
@@ -210,5 +222,14 @@ router.post('/ricerca', async (req, res) => {
         console.log(error);
     }
 });
+
+// router.post('/test', async(req, res) => {
+//     const token = generaToken({utente: 'a', password: 'b'});
+//     res.json({token: token});
+// })
+
+// router.post('/verifica', verificaToken, (req, res) => {
+//     res.json({status: 'ok'});
+// })
 
 module.exports = router;
