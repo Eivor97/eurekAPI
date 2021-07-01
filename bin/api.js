@@ -9,7 +9,9 @@ const apiRouter = require('../routes/api');
 const db = require('../db/middleware');
 db.init();
 
-app.use(cors());
+app.use(cors({
+    exposedHeaders: ['authorization']
+}));
 app.use(express.json());
 app.use('/api', apiRouter);
 
