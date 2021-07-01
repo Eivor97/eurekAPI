@@ -11,6 +11,7 @@ web-build/
 vs.code-workspace
 package-lock.json
 *.old
+.env
 
 # macOS
 .DS_Store
